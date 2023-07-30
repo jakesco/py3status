@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py3status"
+version = "0.1.0"
+description = "statusbar content for sway"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "pip-tools",
+    "pytest",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+exclude = ["tests"]
+
+[tool.black]
+target-version = ['py311']
+
+[tool.ruff]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "C",
+    "B",
+]
+target-version = 'py311'
+
+[tool.ruff.isort]
+known-first-party = ["py3status"]
