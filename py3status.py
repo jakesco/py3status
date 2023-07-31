@@ -141,7 +141,7 @@ if __name__ == "__main__":
     blocks = [
         Block(date_block_updater, timer=1),
         Block(test_block_updater, signal=signal.SIGRTMIN),
-        Block(test_block_updater, timer=10, signal=signal.SIGRTMIN+1),
+        Block(test_block_updater, timer=10, signal=signal.SIGRTMIN + 1),
     ]
 
     sys.exit(main(blocks))
