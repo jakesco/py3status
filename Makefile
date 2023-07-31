@@ -1,11 +1,8 @@
 fix:
-	black py3status && ruff --fix py3status
+	black py3status.py && ruff --fix py3status.py
 
 lint:
-	ruff py3status
-
-test:
-	python -m pytest tests/
+	ruff py3status.py
 
 update-deps:
 	python -m pip install --upgrade pip-tools pip setuptools wheel

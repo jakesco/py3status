@@ -14,14 +14,9 @@ dependencies = []
 [project.optional-dependencies]
 dev = [
     "black",
-    "coverage",
     "pip-tools",
-    "pytest",
     "ruff",
 ]
-
-[tool.setuptools.packages.find]
-exclude = ["tests"]
 
 [tool.black]
 target-version = ['py311']
@@ -36,6 +31,3 @@ select = [
     "B",
 ]
 target-version = 'py311'
-
-[tool.ruff.isort]
-known-first-party = ["py3status"]
