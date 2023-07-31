@@ -125,14 +125,7 @@ Define blocks here.
 
 
 def date_block_updater(block: BlockInfo) -> None:
-    block.full_text = datetime.now().strftime("%a %b %d %_I:%M %p")
-
-
-def test_block_updater(block: BlockInfo) -> None:
-    if block.full_text == "":
-        block.full_text = str(1)
-    n = int(block.full_text)
-    block.full_text = str(n + 1)
+    block.full_text = datetime.now().strftime(" %a %b %d %_I:%M %p ")
 
 
 if __name__ == "__main__":
@@ -140,8 +133,6 @@ if __name__ == "__main__":
     # Trigger with pkill -RTMIN+x py3status
     blocks = [
         Block(date_block_updater, timer=1),
-        Block(test_block_updater, signal=signal.SIGRTMIN),
-        Block(test_block_updater, timer=10, signal=signal.SIGRTMIN + 1),
     ]
 
     sys.exit(main(blocks))
