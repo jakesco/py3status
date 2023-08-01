@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+
+
 import json
 import signal
 import subprocess
@@ -8,6 +10,8 @@ from dataclasses import KW_ONLY, dataclass, field
 from datetime import datetime
 from functools import partial
 from typing import Any, Callable
+
+import psutil
 
 # All blocks will still refresh every 5 mins if no timer is set
 MAX_REFRESH_TIME = 300
@@ -45,7 +49,7 @@ class BlockInfo:
     name: str | None = None
     instance: str | None = None
     urgent: bool | None = None
-    separator: bool | None = None
+    separator: bool | None = True
     separator_block_width: int | None = None
     markup: str | None = None
 
@@ -120,35 +124,58 @@ def main(blocks: list[Block]) -> int:
     sl_thread.join()
     return 0
 
+def shell(cmd: list[str]) -> str:
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return result.stdout.strip()
 
 """
 Define blocks here.
 """
 
 
-def date_block_updater(block: BlockInfo) -> None:
+def time_block(block: BlockInfo) -> None:
     block.full_text = datetime.now().strftime(" %a %b %d %_I:%M %p ")
 
 
-def get_volume(block: BlockInfo) -> None:
-    result = subprocess.run(
-        ["wpctl", "get-volume", "@DEFAULT_SINK@"], capture_output=True, text=True
-    )
-    response = result.stdout.strip()
-    if "[MUTED]" in response:
-        block.full_text = f"󰕾 mute "
+def volume_block(block: BlockInfo) -> None:
+    result = shell(["wpctl", "get-volume", "@DEFAULT_SINK@"])
+    if "[MUTED]" in result:
+        block.full_text = "󰕾 mute "
         block.color = "#777777"
     else:
-
-        vol = float(response.split()[1]) * 100
+        vol = float(result.split()[1]) * 100
         block.full_text = f"󰕾 {vol:.0f}% "
         block.color = None
 
+
+def battery_block(block: BlockInfo) -> None:
+    block.color = None
+    battery = psutil.sensors_battery()
+
+    if battery.power_plugged:
+        block.color = "#40a02b"
+
+    icon = " "
+    if 60 < battery.percent <= 80:
+        icon = " "
+    elif 40 < battery.percent <= 60:
+        icon = " "
+    elif 10 < battery.percent <= 40:
+        icon = " "
+    else:
+        icon = " "
+        block.color = "#d20f39"
+
+    block.full_text = f" {icon}{battery.percent:.0f}% "
+
+
 # Run with /path/to/py3status.py
 # Trigger with pkill -RTMIN+x py3status
+# TODO: don't use psutil
 blocks = [
-    Block(get_volume, signal=signal.SIGRTMIN),
-    Block(date_block_updater, timer=1, info=BlockInfo(separator=True)),
+    # Block(volume_block, signal=signal.SIGRTMIN),
+    Block(battery_block, timer=60),
+    Block(time_block, timer=1),
 ]
 
 sys.exit(main(blocks))

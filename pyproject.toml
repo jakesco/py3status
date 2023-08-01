@@ -9,7 +9,9 @@ description = "statusbar content for sway"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = ["Private :: Do Not Upload"]
-dependencies = []
+dependencies = [
+    "psutil",
+]
 
 [project.optional-dependencies]
 dev = [

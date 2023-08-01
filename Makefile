@@ -1,11 +1,17 @@
+prog = py3status.py
+
 fix:
-	black py3status.py && ruff --fix py3status.py
+	black $(prog) && ruff --fix $(prog)
 
 lint:
-	ruff py3status.py
+	ruff $(prog)
+
+install:
+	cp $(prog) ${HOME}/.local/scripts/$(prog)
 
 update-deps:
 	python -m pip install --upgrade pip-tools pip setuptools wheel
+	pip-compile --upgrade --resolver backtracking -o requirements.txt pyproject.toml
 	pip-compile --extra dev --upgrade --resolver backtracking -o requirements-dev.txt pyproject.toml
 
-.PHONY: fix lint test update-deps
+.PHONY: fix lint install update-deps
