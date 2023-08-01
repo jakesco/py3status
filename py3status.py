@@ -1,16 +1,17 @@
 #!/usr/bin/python3
-from __future__ import annotations
-
 import json
 import signal
+import subprocess
 import sys
 import threading
 from dataclasses import KW_ONLY, dataclass, field
 from datetime import datetime
+from functools import partial
 from typing import Any, Callable
 
 # All blocks will still refresh every 5 mins if no timer is set
 MAX_REFRESH_TIME = 300
+printf = partial(print, flush=True)
 
 
 @dataclass
@@ -24,9 +25,8 @@ class Header:
         return json.dumps(vars(self))
 
     def print_prelude(self) -> None:
-        print(self.serialize())
-        print("[")
-        print("[]")
+        printf(self.serialize())
+        printf("[")
 
 
 @dataclass
@@ -86,12 +86,14 @@ class StatusLine:
         signal.signal(signal.SIGINT, lambda s, h: self.stop())
 
     def run(self):
+        output = [block.info.to_dict() for block in self.line]
+        printf(f"{json.dumps(output)}")
         while self.running:
             self.event.wait(timeout=MAX_REFRESH_TIME)
             output = [block.info.to_dict() for block in self.line]
-            print(f",{json.dumps(output)}")
+            printf(f",{json.dumps(output)}")
             self.event.clear()
-        print("]")
+        printf("]")
 
     def stop(self):
         self.running = False
@@ -125,14 +127,28 @@ Define blocks here.
 
 
 def date_block_updater(block: BlockInfo) -> None:
-    block.full_text = datetime.now().strftime(" %a %b %d %_I:%M %p ")
+    block.full_text = datetime.now().strftime(" %a %b %d %_I:%M %p ")
 
 
-if __name__ == "__main__":
-    # Run with /path/to/py3status.py
-    # Trigger with pkill -RTMIN+x py3status
-    blocks = [
-        Block(date_block_updater, timer=1),
-    ]
+def get_volume(block: BlockInfo) -> None:
+    result = subprocess.run(
+        ["wpctl", "get-volume", "@DEFAULT_SINK@"], capture_output=True, text=True
+    )
+    response = result.stdout.strip()
+    if "[MUTED]" in response:
+        block.full_text = f"󰕾 mute "
+        block.color = "#777777"
+    else:
 
-    sys.exit(main(blocks))
+        vol = float(response.split()[1]) * 100
+        block.full_text = f"󰕾 {vol:.0f}% "
+        block.color = None
+
+# Run with /path/to/py3status.py
+# Trigger with pkill -RTMIN+x py3status
+blocks = [
+    Block(get_volume, signal=signal.SIGRTMIN),
+    Block(date_block_updater, timer=1, info=BlockInfo(separator=True)),
+]
+
+sys.exit(main(blocks))
