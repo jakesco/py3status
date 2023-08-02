@@ -29,7 +29,7 @@ class Header:
         return json.dumps(vars(self))
 
     def print_prelude(self) -> None:
-        printf(self.serialize())
+        print(self.serialize())
         printf("[")
 
 
@@ -155,8 +155,9 @@ def battery_block(block: BlockInfo) -> None:
     if battery.power_plugged:
         block.color = "#40a02b"
 
-    icon = " "
-    if 60 < battery.percent <= 80:
+    if 80 < battery.percent <= 100:
+        icon = " "
+    elif 60 < battery.percent <= 80:
         icon = " "
     elif 40 < battery.percent <= 60:
         icon = " "
@@ -166,14 +167,14 @@ def battery_block(block: BlockInfo) -> None:
         icon = " "
         block.color = "#d20f39"
 
-    block.full_text = f" {icon}{battery.percent:.0f}% "
+    block.full_text = f" {icon} {battery.percent:.0f}% "
 
 
 # Run with /path/to/py3status.py
 # Trigger with pkill -RTMIN+x py3status
 # TODO: don't use psutil
 blocks = [
-    # Block(volume_block, signal=signal.SIGRTMIN),
+    Block(volume_block, signal=signal.SIGRTMIN),
     Block(battery_block, timer=60),
     Block(time_block, timer=1),
 ]

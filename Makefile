@@ -7,7 +7,7 @@ lint:
 	ruff $(prog)
 
 install:
-	cp $(prog) ${HOME}/.local/scripts/$(prog)
+	cp $(prog) ${HOME}/.local/bin/$(prog)
 
 update-deps:
 	python -m pip install --upgrade pip-tools pip setuptools wheel
